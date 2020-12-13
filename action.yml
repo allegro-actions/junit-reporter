@@ -1,0 +1,21 @@
+name: 'JUnit Reporter'
+description: 'Report JUnit test results as annotations on Github Pull Request and collect them on remote server'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+inputs:
+  token:
+    description: 'Used to add check informations'
+    required: false
+    default: ${{ github.token }}
+  path:
+    description: 'JUnit XML report path in glob format'
+    required: false
+    default: '**/TEST-*.xml'
+  matrix:
+    description: 'Matrix context of job'
+    required: false
+    default: ${{ toJson(matrix) }}
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

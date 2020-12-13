@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="3" failures="0" errors="0" time="4.444">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2020-12-15T20:52:12" time="1.01" tests="1">
+    <testcase classname=" test runs" name=" test runs" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2020-12-15T20:52:12" time="3.842" tests="2">
+    <testcase classname=" should find reports for given path" name=" should find reports for given path" time="1.062">
+    </testcase>
+    <testcase classname=" should return empty results when reports not found" name=" should return empty results when reports not found" time="1.691">
+    </testcase>
+  </testsuite>
+</testsuites>
