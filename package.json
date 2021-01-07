@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
+  "name": "junit-reporter",
   "version": "0.1.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "JUnit tests results reporter",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc && ncc build --source-map --license licenses.txt",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/allegro-actions/junit-reporter.git"
   },
   "keywords": [
     "actions",
