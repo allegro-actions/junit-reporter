@@ -7,9 +7,12 @@ import Report from './Report';
 export async function create(token: string, report: Report): Promise<void> {
   const message = formatter.toMarkdown(report);
 
-  const name = matrix.getName('JUnit Report: ');
+  const name = matrix.getName('JUnit Report');
   const status = 'completed' as const;
-  const conclusion = report.hasTests() && report.isSuccesfull() ? ('success' as const) : ('failure' as const);
+  const conclusion =
+    report.hasTests() && report.isSuccesfull()
+      ? ('success' as const)
+      : ('failure' as const);
   const pullRequest = github.context.payload.pull_request;
   const head_sha = (pullRequest && pullRequest.head.sha) || github.context.sha;
 
@@ -21,8 +24,8 @@ export async function create(token: string, report: Report): Promise<void> {
     conclusion,
     output: {
       title: name,
-      summary: message
-    }
+      summary: message,
+    },
   };
 
   core.debug(JSON.stringify(createCheckRequest, null, 2));

@@ -1,11 +1,11 @@
 import Report from '../src/Report';
-import {TestCase, TestSuite} from 'junit2json';
-import {toMarkdown} from '../src/formatter';
+import { TestCase, TestSuite } from 'junit2json';
+import { toMarkdown } from '../src/formatter';
 
 const counter = jest.fn();
 jest.mock('../src/Report', () => {
   return jest.fn().mockImplementation(() => {
-    return {counter};
+    return { counter };
   });
 });
 
@@ -24,8 +24,10 @@ describe('formatter', () => {
         name: 'TestSuite',
         classname: 'TestSuiteClassName',
         tests: 1,
-        testcase: [{name: 'TestCase', classname: 'TestCaseClassName'} as TestCase]
-      } as TestSuite
+        testcase: [
+          { name: 'TestCase', classname: 'TestCaseClassName' } as TestCase,
+        ],
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -38,7 +40,9 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual('### Found 1 test\n\n- **All** tests were successful');
+    expect(result).toEqual(
+      '### Found 1 test\n\n- **All** tests were successful'
+    );
   });
 
   test('should handle empty testcase', async () => {
@@ -47,8 +51,8 @@ describe('formatter', () => {
         name: 'TestSuite',
         classname: 'TestSuiteClassName',
         tests: 1,
-        testcase: undefined as unknown
-      } as TestSuite
+        testcase: undefined as unknown,
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -61,7 +65,9 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual('### Found 1 test\n\n- **All** tests were successful');
+    expect(result).toEqual(
+      '### Found 1 test\n\n- **All** tests were successful'
+    );
   });
 
   test('should handle failed test', async () => {
@@ -74,15 +80,15 @@ describe('formatter', () => {
         testcase: [
           {
             name: 'Successful TestCase',
-            classname: 'TestCaseClassName'
+            classname: 'TestCaseClassName',
           } as TestCase,
           {
             name: 'Failed TestCase',
             classname: 'TestCaseClassName',
-            failure: [{message: 'Failed message'}]
-          } as TestCase
-        ]
-      } as TestSuite
+            failure: [{ message: 'Failed message' }],
+          } as TestCase,
+        ],
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -119,15 +125,15 @@ describe('formatter', () => {
         testcase: [
           {
             name: 'Successful TestCase',
-            classname: 'TestCaseClassName'
+            classname: 'TestCaseClassName',
           } as TestCase,
           {
             name: 'Skipped TestCase',
             classname: 'TestCaseClassName',
-            skipped: [{message: 'Skipped'}]
-          } as TestCase
-        ]
-      } as TestSuite
+            skipped: [{ message: 'Skipped' }],
+          } as TestCase,
+        ],
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -154,6 +160,47 @@ describe('formatter', () => {
     );
   });
 
+  test('should handle test without message', async () => {
+    report.getTestSuites = jest.fn(() => [
+      {
+        name: 'TestSuite',
+        classname: 'TestSuiteClassName',
+        tests: 1,
+        skipped: 1,
+        testcase: [
+          {
+            name: 'Skipped TestCase',
+            classname: 'TestCaseClassName',
+            skipped: [{}],
+          } as TestCase,
+        ],
+      } as TestSuite,
+    ]);
+
+    report.hasTests = jest.fn(() => true);
+    report.hasFailures = jest.fn(() => false);
+    report.hasErrors = jest.fn(() => false);
+    report.hasSkipped = jest.fn(() => true);
+
+    report.counter.tests = 1;
+    report.counter.succesfull = 0;
+    report.counter.skipped = 1;
+    report.counter.get = jest.fn(() => 1);
+
+    const result = toMarkdown(report);
+
+    expect(result).toEqual(
+      '### Found 1 test\n\n' +
+        '- **None** test were successful\n' +
+        '- **1** test is skipped\n' +
+        '### Skipped tests\n\n' +
+        '<details>\n ' +
+        '<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>\n\n' +
+        '> No message provided\n\n' +
+        '</details>\n'
+    );
+  });
+
   test('should handle test with error', async () => {
     report.getTestSuites = jest.fn(() => [
       {
@@ -164,15 +211,15 @@ describe('formatter', () => {
         testcase: [
           {
             name: 'Successful TestCase',
-            classname: 'TestCaseClassName'
+            classname: 'TestCaseClassName',
           } as TestCase,
           {
             name: 'TestCase with Error',
             classname: 'TestCaseClassName',
-            error: [{message: 'Something\nfailed'}]
-          } as TestCase
-        ]
-      } as TestSuite
+            error: [{ message: 'Something\nfailed' }],
+          } as TestCase,
+        ],
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -208,9 +255,9 @@ describe('formatter', () => {
         testcase: [
           {
             name: 'Successful TestCase',
-            classname: 'SuccessfulTestCaseClassName'
-          } as TestCase
-        ]
+            classname: 'SuccessfulTestCaseClassName',
+          } as TestCase,
+        ],
       } as TestSuite,
       {
         name: 'SecondTestSuite',
@@ -220,14 +267,14 @@ describe('formatter', () => {
         testcase: [
           {
             name: 'Successful TestCase',
-            classname: 'SuccessfulTestCaseClassName'
+            classname: 'SuccessfulTestCaseClassName',
           } as TestCase,
           {
             name: 'Failed TestCase',
             classname: 'FailedCaseClassName',
-            failure: [{message: 'Failed'}]
-          } as TestCase
-        ]
+            failure: [{ message: 'Failed' }],
+          } as TestCase,
+        ],
       } as TestSuite,
       {
         name: 'Third TestSuite',
@@ -238,9 +285,9 @@ describe('formatter', () => {
           {
             name: 'Skipped TestCase',
             classname: 'TestCaseClassName',
-            skipped: [{message: 'Skipped'}]
-          } as TestCase
-        ]
+            skipped: [{ message: 'Skipped' }],
+          } as TestCase,
+        ],
       } as TestSuite,
       {
         name: 'SeparateTestSuite',
@@ -251,10 +298,10 @@ describe('formatter', () => {
           {
             name: 'TestCase with Error',
             classname: 'TestCaseClassName',
-            error: [{message: 'Something\nfailed'}]
-          } as TestCase
-        ]
-      } as TestSuite
+            error: [{ message: 'Something\nfailed' }],
+          } as TestCase,
+        ],
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -303,20 +350,68 @@ describe('formatter', () => {
         tests: 12,
         failures: 12,
         testcase: [
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '1'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '2'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '3'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '4'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '5'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '5'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '7'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '8'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '9'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '10'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '11'}]} as TestCase,
-          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '12'}]} as TestCase
-        ]
-      } as TestSuite
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '1' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '2' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '3' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '4' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '5' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '5' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '7' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '8' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '9' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '10' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '11' }],
+          } as TestCase,
+          {
+            name: 'TestCase',
+            classname: 'TestCaseClassName',
+            failure: [{ message: '12' }],
+          } as TestCase,
+        ],
+      } as TestSuite,
     ]);
 
     report.hasTests = jest.fn(() => true);
@@ -331,6 +426,8 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toContain('_Only the first ten tests has been listed below!_');
+    expect(result).toContain(
+      '_Only the first ten tests has been listed below!_'
+    );
   });
 });

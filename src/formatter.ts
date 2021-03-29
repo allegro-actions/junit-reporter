@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import {TestCase} from 'junit2json';
+import { TestCase } from 'junit2json';
 import Report from './Report';
 
 function getMessage(testCase: TestCase): string | undefined {
@@ -7,10 +7,10 @@ function getMessage(testCase: TestCase): string | undefined {
     testCase.skipped?.[0]?.message?.trim() ||
     testCase.error?.[0]?.message?.trim() ||
     testCase.failure?.[0]?.message?.trim() ||
-    undefined
+    'No message provided'
   )
     ?.split('\n')
-    .map(s => `> ${s}`)
+    .map((s) => `> ${s}`)
     .join('\n');
 }
 
@@ -77,8 +77,13 @@ function getType(testCase: TestCase): string | undefined {
   }
 }
 
-function getMessageAboutLimit(results: string[] | undefined, count: number): string {
-  return (results?.length || 0) < count ? '_Only the first ten tests has been listed below!_' : '';
+function getMessageAboutLimit(
+  results: string[] | undefined,
+  count: number
+): string {
+  return (results?.length || 0) < count
+    ? '_Only the first ten tests has been listed below!_'
+    : '';
 }
 
 export function toMarkdown(report: Report): string {
@@ -96,7 +101,8 @@ export function toMarkdown(report: Report): string {
 
     for (const testCase of testSuite.testcase) {
       const type = getType(testCase);
-      if (type === undefined || (results.get(type)?.length || 0) >= 10) continue;
+      if (type === undefined || (results.get(type)?.length || 0) >= 10)
+        continue;
 
       const name = getName(testCase);
       const message = getMessage(testCase);
@@ -113,11 +119,14 @@ export function toMarkdown(report: Report): string {
   let result = `### Found ${tests} ${getPlural('tests', tests)}\n`;
 
   if (successful === tests) {
-    result += `\n- **All** tests were successful`;
+    result += '\n- **All** tests were successful';
   } else if (successful > 0) {
-    result += `\n- **${successful}** ${getPlural('successful', successful)} successful`;
+    result += `\n- **${successful}** ${getPlural(
+      'successful',
+      successful
+    )} successful`;
   } else {
-    result += `\n- **None** test were successful`;
+    result += '\n- **None** test were successful';
   }
 
   if (report.hasFailures()) {
@@ -127,7 +136,10 @@ export function toMarkdown(report: Report): string {
 
   if (report.hasErrors()) {
     const errors = report.counter.errors;
-    result += `\n- **${errors}** ${getPlural('errors', errors)} ended with error`;
+    result += `\n- **${errors}** ${getPlural(
+      'errors',
+      errors
+    )} ended with error`;
   }
 
   if (report.hasSkipped()) {

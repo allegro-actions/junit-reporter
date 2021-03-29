@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" tests="8" skipped="1" failures="0" errors="0" timestamp="2021-03-29T11:42:38" hostname="polpc05927" time="1.385">
+    <properties/>
+    <testcase name="Should return offers served by reader" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="1.367"/>
+    <testcase name="Should register with changes registry all offers fetched from reader as added to observed" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.001">
+        <skipped/>
+    </testcase>
+    <testcase name="Should use writer repo with given userId, when requested to add to observed" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.01"/>
+    <testcase name="Should register 'Add' change, when watched offer was restored" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.001"/>
+    <testcase name="Should use writer repo with given userId, when requested to remove from observed" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.001"/>
+    <testcase name="Should use register Add change, when requested to remove from observed" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.001"/>
+    <testcase name="Should use register Add change, when requested to add to observed" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.0"/>
+    <testcase name="Should ask reader with given userId" classname="pl.allegro.android.buyers.watched.internal.CoordinatorRepositoryTest" time="0.0"/>
+    <system-out><![CDATA[]]></system-out>
+    <system-err><![CDATA[]]></system-err>
+</testsuite>

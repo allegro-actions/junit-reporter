@@ -1,4 +1,4 @@
-import {TestSuite} from 'junit2json';
+import { TestSuite } from 'junit2json';
 
 export default class Counter {
   tests = 0;

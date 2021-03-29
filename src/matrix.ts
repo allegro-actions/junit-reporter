@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 
 function getMatrix(): Record<string, string> {
   try {
-    return JSON.parse(core.getInput('matrix', {required: false}));
+    return JSON.parse(core.getInput('matrix', { required: false }));
   } catch (e) {
     return {};
   }
@@ -22,5 +22,17 @@ function getContext(): string {
 }
 
 export function getName(prefix?: string): string {
-  return `${prefix || ''}${getContext()}`;
+  const context = getContext();
+
+  if (context && context.length > 0) {
+    if (prefix && prefix.length > 0) {
+      return `${prefix}: ${context}`;
+    } else {
+      return context;
+    }
+  } else if (prefix && prefix.length > 0) {
+    return prefix;
+  } else {
+    return '';
+  }
 }
