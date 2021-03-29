@@ -58,16 +58,13 @@ function getTitle(type: string): string {
     case 'errors': {
       return 'Errors';
     }
-    case 'successes': {
-      return 'Successful tests';
-    }
     default: {
       return 'Other';
     }
   }
 }
 
-function getType(testCase: TestCase): string {
+function getType(testCase: TestCase): string | undefined {
   if ((testCase.skipped?.length || 0) > 0) {
     return 'skipped';
   } else if ((testCase.error?.length || 0) > 0) {
@@ -75,13 +72,17 @@ function getType(testCase: TestCase): string {
   } else if ((testCase.failure?.length || 0) > 0) {
     return 'failures';
   } else {
-    return 'successes';
+    return undefined;
   }
 }
 
-export function toMarkdown(report: Report): Result {
+function getMessageAboutLimit(results: string[] | undefined, count: number): string {
+  return (results?.length || 0) < count ? '_Only the first ten tests has been listed below!_' : '';
+}
+
+export function toMarkdown(report: Report): string {
   if (!report.hasTests()) {
-    return {summary: '### Test results not found\n'};
+    return '### Test results not found\n';
   }
 
   const results: Map<string, string[]> = new Map();
@@ -89,15 +90,12 @@ export function toMarkdown(report: Report): Result {
   for (const testSuite of report.getTestSuites()) {
     for (const testCase of testSuite.testcase) {
       const type = getType(testCase);
+      if (type === undefined || (results.get(type)?.length || 0) >= 10) continue;
+
       const name = getName(testCase);
       const message = getMessage(testCase);
 
-      let details;
-      if (message) {
-        details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
-      } else {
-        details = `* ${name}`;
-      }
+      const details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
 
       results.set(type, (results.get(type) || []).concat(details));
     }
@@ -106,47 +104,42 @@ export function toMarkdown(report: Report): Result {
   const tests = report.counter.tests,
     successful = report.counter.succesfull;
 
-  let summary = `### Found ${tests} ${getPlural('tests', tests)}\n`;
+  let result = `### Found ${tests} ${getPlural('tests', tests)}\n`;
 
   if (successful === tests) {
-    summary += `\n- **All** tests were successful`;
+    result += `\n- **All** tests were successful`;
   } else if (successful > 0) {
-    summary += `\n- **${successful}** ${getPlural('successful', successful)} successful`;
+    result += `\n- **${successful}** ${getPlural('successful', successful)} successful`;
   } else {
-    summary += `\n- **None** test were successful`;
+    result += `\n- **None** test were successful`;
   }
 
   if (report.hasFailures()) {
     const failures = report.counter.failures;
-    summary += `\n- **${failures}** ${getPlural('failures', failures)} failed`;
+    result += `\n- **${failures}** ${getPlural('failures', failures)} failed`;
   }
 
   if (report.hasErrors()) {
     const errors = report.counter.errors;
-    summary += `\n- **${errors}** ${getPlural('errors', errors)} ended with error`;
+    result += `\n- **${errors}** ${getPlural('errors', errors)} ended with error`;
   }
 
   if (report.hasSkipped()) {
     const skipped = report.counter.skipped;
-    summary += `\n- **${skipped}** ${getPlural('skipped', skipped)} skipped`;
+    result += `\n- **${skipped}** ${getPlural('skipped', skipped)} skipped`;
   }
 
-  let text = '';
   const keys = [...results.keys()].sort((a, b) => a.localeCompare(b));
   for (const key of keys) {
     if ((results.get(key)?.length || 0) <= 0) continue;
 
-    text += `\n### ${getTitle(key)}\n`;
-    text += '\n';
+    result += `\n### ${getTitle(key)}\n`;
+    result += getMessageAboutLimit(results.get(key), report.counter.get(key));
+    result += '\n';
 
-    text += results.get(key)?.join('\n') || '';
-    text += '\n';
+    result += results.get(key)?.join('\n') || '';
+    result += '\n';
   }
 
-  return {summary, text};
-}
-
-interface Result {
-  summary: string;
-  text?: string;
+  return result;
 }

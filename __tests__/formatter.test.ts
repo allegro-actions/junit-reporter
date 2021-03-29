@@ -15,7 +15,7 @@ describe('formatter', () => {
   test('should handle empty tests results', async () => {
     report.hasTests = jest.fn(() => false);
 
-    expect(toMarkdown(report).summary).toEqual('### Test results not found\n');
+    expect(toMarkdown(report)).toEqual('### Test results not found\n');
   });
 
   test('should handle successful test', async () => {
@@ -38,7 +38,7 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result.summary).toEqual('### Found 1 test\n\n- **All** tests were successful');
+    expect(result).toEqual('### Found 1 test\n\n- **All** tests were successful');
   });
 
   test('should handle failed test', async () => {
@@ -74,15 +74,15 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result.summary).toEqual('### Found 2 tests\n\n- **1** test was successful\n- **1** test failed');
-    expect(result.text).toEqual(
-      '\n### Failed tests\n\n' +
+    expect(result).toEqual(
+      '### Found 2 tests\n\n' +
+        '- **1** test was successful\n' +
+        '- **1** test failed\n' +
+        '### Failed tests\n\n' +
         '<details>\n ' +
         '<summary><strong>TestCaseClassName</strong>: Failed TestCase</summary>\n\n' +
         '> Failed message\n\n' +
-        '</details>\n' +
-        '\n### Successful tests\n\n' +
-        '* <strong>TestCaseClassName</strong>: Successful TestCase\n'
+        '</details>\n'
     );
   });
 
@@ -119,15 +119,15 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result.summary).toEqual('### Found 2 tests\n\n- **1** test was successful\n- **1** test is skipped');
-    expect(result.text).toEqual(
-      '\n### Skipped tests\n\n' +
+    expect(result).toEqual(
+      '### Found 2 tests\n\n' +
+        '- **1** test was successful\n' +
+        '- **1** test is skipped\n' +
+        '### Skipped tests\n\n' +
         '<details>\n ' +
         '<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>\n\n' +
         '> Skipped\n\n' +
-        '</details>\n' +
-        '\n### Successful tests\n\n' +
-        '* <strong>TestCaseClassName</strong>: Successful TestCase\n'
+        '</details>\n'
     );
   });
 
@@ -164,15 +164,15 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result.summary).toEqual('### Found 2 tests\n\n- **1** test was successful\n- **1** test ended with error');
-    expect(result.text).toEqual(
-      '\n### Errors\n\n' +
+    expect(result).toEqual(
+      '### Found 2 tests\n\n' +
+        '- **1** test was successful\n' +
+        '- **1** test ended with error\n' +
+        '### Errors\n\n' +
         '<details>\n ' +
         '<summary><strong>TestCaseClassName</strong>: TestCase with Error</summary>\n\n' +
         '> Something\n> failed\n\n' +
-        '</details>\n' +
-        '\n### Successful tests\n\n' +
-        '* <strong>TestCaseClassName</strong>: Successful TestCase\n'
+        '</details>\n'
     );
   });
 
@@ -197,7 +197,7 @@ describe('formatter', () => {
         testcase: [
           {
             name: 'Successful TestCase',
-            classname: 'FailedCaseClassName'
+            classname: 'SuccessfulTestCaseClassName'
           } as TestCase,
           {
             name: 'Failed TestCase',
@@ -248,32 +248,66 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result.summary).toEqual(
+    expect(result).toEqual(
       '### Found 5 tests\n\n' +
         '- **2** tests were successful\n' +
         '- **1** test failed\n' +
         '- **1** test ended with error\n' +
-        '- **1** test is skipped'
-    );
-    expect(result.text).toEqual(
-      '\n### Errors\n\n' +
+        '- **1** test is skipped\n' +
+        '### Errors\n\n' +
         '<details>\n ' +
         '<summary><strong>TestCaseClassName</strong>: TestCase with Error</summary>\n\n' +
         '> Something\n> failed\n\n' +
-        '</details>\n' +
-        '\n### Failed tests\n\n' +
+        '</details>\n\n' +
+        '### Failed tests\n\n' +
         '<details>\n ' +
         '<summary><strong>FailedCaseClassName</strong>: Failed TestCase</summary>\n\n' +
         '> Failed\n\n' +
-        '</details>\n' +
-        '\n### Skipped tests\n\n' +
+        '</details>\n\n' +
+        '### Skipped tests\n\n' +
         '<details>\n ' +
         '<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>' +
         '\n\n> Skipped\n\n' +
-        '</details>\n' +
-        '\n### Successful tests\n\n' +
-        '* <strong>SuccessfulTestCaseClassName</strong>: Successful TestCase\n' +
-        '* <strong>FailedCaseClassName</strong>: Successful TestCase\n'
+        '</details>\n'
     );
+  });
+
+  test('should only display first 10 failed tests', async () => {
+    report.getTestSuites = jest.fn(() => [
+      {
+        name: 'TestSuite',
+        classname: 'TestSuiteClassName',
+        tests: 12,
+        failures: 12,
+        testcase: [
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '1'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '2'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '3'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '4'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '5'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '5'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '7'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '8'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '9'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '10'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '11'}]} as TestCase,
+          {name: 'TestCase', classname: 'TestCaseClassName', failure: [{message: '12'}]} as TestCase
+        ]
+      } as TestSuite
+    ]);
+
+    report.hasTests = jest.fn(() => true);
+    report.hasFailures = jest.fn(() => true);
+    report.hasErrors = jest.fn(() => false);
+    report.hasSkipped = jest.fn(() => false);
+
+    report.counter.tests = 12;
+    report.counter.succesfull = 0;
+    report.counter.failures = 12;
+    report.counter.get = jest.fn(() => 12);
+
+    const result = toMarkdown(report);
+
+    expect(result).toContain('_Only the first ten tests has been listed below!_');
   });
 });

@@ -5,7 +5,7 @@ import * as matrix from './matrix';
 import Report from './Report';
 
 export async function create(token: string, report: Report): Promise<void> {
-  const formatted = formatter.toMarkdown(report);
+  const message = formatter.toMarkdown(report);
 
   const name = matrix.getName('JUnit Report: ');
   const status = 'completed' as const;
@@ -21,8 +21,7 @@ export async function create(token: string, report: Report): Promise<void> {
     conclusion,
     output: {
       title: name,
-      summary: formatted.summary,
-      text: formatted.text
+      summary: message
     }
   };
 
