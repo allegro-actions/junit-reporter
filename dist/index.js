@@ -237,12 +237,32 @@ exports.create = create;
 /***/ }),
 
 /***/ 7556:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.toMarkdown = void 0;
+const core = __importStar(__webpack_require__(2186));
 function getMessage(testCase) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     return (_k = (((_c = (_b = (_a = testCase.skipped) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message) === null || _c === void 0 ? void 0 : _c.trim()) || ((_f = (_e = (_d = testCase.error) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.message) === null || _f === void 0 ? void 0 : _f.trim()) || ((_j = (_h = (_g = testCase.failure) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.message) === null || _j === void 0 ? void 0 : _j.trim()) ||
@@ -321,6 +341,10 @@ function toMarkdown(report) {
     }
     const results = new Map();
     for (const testSuite of report.getTestSuites()) {
+        if (!Array.isArray(testSuite.testcase)) {
+            core.warning(`Found empty testcase: ${JSON.stringify(testSuite)}`);
+            continue;
+        }
         for (const testCase of testSuite.testcase) {
             const type = getType(testCase);
             if (type === undefined || (((_a = results.get(type)) === null || _a === void 0 ? void 0 : _a.length) || 0) >= 10)

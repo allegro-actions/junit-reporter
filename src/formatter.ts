@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import {TestCase} from 'junit2json';
 import Report from './Report';
 
@@ -88,6 +89,11 @@ export function toMarkdown(report: Report): string {
   const results: Map<string, string[]> = new Map();
 
   for (const testSuite of report.getTestSuites()) {
+    if (!Array.isArray(testSuite.testcase)) {
+      core.warning(`Found empty testcase: ${JSON.stringify(testSuite)}`);
+      continue;
+    }
+
     for (const testCase of testSuite.testcase) {
       const type = getType(testCase);
       if (type === undefined || (results.get(type)?.length || 0) >= 10) continue;
