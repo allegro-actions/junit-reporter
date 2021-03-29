@@ -12,8 +12,8 @@ function getMatrix(): Record<string, string> {
 function getContext(): string {
   const job = github.context.job || '';
   const matrix = getMatrix();
-  const os = matrix['os'] || matrix['operating-system'] || '';
-  const node = matrix['node'] || '';
+  const os = matrix ? matrix['os'] || matrix['operating-system'] || '' : '';
+  const node = matrix ? matrix['node'] || '' : '';
 
   if (job && os && node) return `${job} (${os}, node: ${node})`;
   else if (job && os) return `${job} (${os})`;
