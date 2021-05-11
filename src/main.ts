@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as check from './check';
+import * as event from './event';
 import Report from './Report';
 
 export async function run(): Promise<void> {
@@ -12,7 +13,9 @@ export async function run(): Promise<void> {
     const report = new Report(reportsPath);
     await report.build();
 
-    await check.create(token, report);
+    const checkRun = await check.create(token, report);
+    await event.send(report, checkRun);
+
   } catch (error) {
     core.setFailed(error.message);
   }

@@ -4,7 +4,7 @@ import * as formatter from './formatter';
 import * as matrix from './matrix';
 import Report from './Report';
 
-export async function create(token: string, report: Report): Promise<void> {
+export async function create(token: string, report: Report): Promise<CheckRun> {
   const message = formatter.toMarkdown(report);
 
   const name = matrix.getName('JUnit Report');
@@ -31,5 +31,16 @@ export async function create(token: string, report: Report): Promise<void> {
   core.debug(JSON.stringify(createCheckRequest, null, 2));
 
   const octokit = github.getOctokit(token);
-  await octokit.checks.create(createCheckRequest);
+  const response = await octokit.checks.create(createCheckRequest);
+  return {
+    id: response.data.id,
+    nodeId: response.data.node_id,
+    checkSuiteId: response.data.check_suite?.id
+  };
+}
+
+export interface CheckRun {
+  id: number,
+  nodeId: string,
+  checkSuiteId: number | undefined
 }

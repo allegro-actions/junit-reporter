@@ -16,6 +16,10 @@ inputs:
     description: 'Matrix context of job'
     required: false
     default: ${{ toJson(matrix) }}
+  webhook-url:
+    description: 'Specifies the endpoint URL where the JUnit test results will be send'
+    required: false
+
 runs:
   using: 'node12'
   main: 'dist/index.js'
