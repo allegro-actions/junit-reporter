@@ -19,7 +19,6 @@ inputs:
   webhook-url:
     description: 'Specifies the endpoint URL where the JUnit test results will be send'
     required: false
-    default: ${{ secrets.TEST_RESULTS_URL }}
 runs:
   using: 'node12'
   main: 'dist/index.js'

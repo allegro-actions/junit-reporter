@@ -7,6 +7,7 @@ import {CheckRun} from './check';
 
 export async function send(report: Report, checkRun: CheckRun): Promise<void> {
     const url = core.getInput('webhook-url');
+    core.info(JSON.stringify(process.env, null, 2));
     if (url) {
         const testResults = [];
         for (const testSuite of report.getTestSuites()) {

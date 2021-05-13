@@ -290,6 +290,7 @@ const axios_1 = __importDefault(__nccwpck_require__(6545));
 function send(report, checkRun) {
     return __awaiter(this, void 0, void 0, function* () {
         const url = core.getInput('webhook-url');
+        core.info(JSON.stringify(process.env, null, 2));
         if (url) {
             const testResults = [];
             for (const testSuite of report.getTestSuites()) {
