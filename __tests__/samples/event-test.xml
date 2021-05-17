@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.failure.github.GitHubSpec" tests="3" skipped="0" failures="1" errors="0" timestamp="2020-12-12T20:16:46" hostname="polpc06065" time="0.38">
+    <properties/>
+    <testcase name="successful" classname="pl.success.github.GitHubSpec" time="0.364"/>
+    <testcase name="should try to apply #0" classname="pl.failure.github.GitHubSpec" time="0.006"/>
+    <testcase name="should try to apply #1" classname="pl.failure.github.GitHubSpec" time="0.006"/>
+    <testcase name="should try to apply #2" classname="pl.failure.github.GitHubSpec" time="0.006"/>
+    <testcase name="should try to apply #3" classname="pl.failure.github.GitHubSpec" time="0.006"/>
+    <testcase name="error" classname="pl.failure.github.GitHubSpec" time="0.01">
+        <failure message="Too many invocations for:&#10;&#10;0 * client.put(&quot;repo-name&quot;, []) &gt;&gt; []   (1 invocation)&#10;&#10;Matching invocations (ordered by last occurrence):&#10;&#10;1 * client.put('repo-name', [])   &lt;-- this triggered the error&#10;&#10;" type="org.spockframework.mock.TooManyInvocationsError">
+            Too many invocations for:
+        </failure>
+    </testcase>
+    <testcase name="skipped" classname="pl.skipped.github.GitHubSpec" time="0.001">
+        <skipped/>
+    </testcase>
+    <system-out><![CDATA[]]></system-out>
+    <system-err><![CDATA[]]></system-err>
+</testsuite>

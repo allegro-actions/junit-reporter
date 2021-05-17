@@ -6,8 +6,10 @@ import {TestCase} from 'junit2json';
 import {CheckRun} from './check';
 
 export async function send(report: Report, checkRun: CheckRun): Promise<void> {
-    const url = core.getInput('webhook-url');
-    if (url) {
+    const url = core.getInput('webhook-url') || process.env.JUNIT_REPORTER_TEST_RESULTS_URL;
+    const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
+
+    if (url && maxMessageSize) {
         const testResults = [];
         for (const testSuite of report.getTestSuites()) {
             if (!Array.isArray(testSuite.testcase)) {
@@ -28,8 +30,7 @@ export async function send(report: Report, checkRun: CheckRun): Promise<void> {
             }
         }
 
-        core.info(`Sending test results [${testResults.length}] to webhook endpoint.`);
-        await axios.post(url, {
+        const base = {
             ...github.context.repo,
             sha: github.context.sha,
             checkRun: checkRun,
@@ -37,8 +38,51 @@ export async function send(report: Report, checkRun: CheckRun): Promise<void> {
             action: github.context.action,
             runNumber: github.context.runNumber,
             runId: github.context.runId,
-            testResults: testResults,
-        });
+            part: 0,
+            last: false,
+            testResults: [],
+        };
+
+        const baseSize = Buffer.byteLength(JSON.stringify(base));
+        let testResultsChunk = [];
+        let chunkSize = baseSize;
+        let part = 0;
+
+        for (const testResult of testResults) {
+            const size = Buffer.byteLength(JSON.stringify(testResult)) + 1;
+
+            if (chunkSize + size > maxMessageSize) {
+                if (testResultsChunk.length == 0) {
+                    throw new Error('Test result size is exceeding webhook-message-size param. ' +
+                        `Test result size [${size}] + meta data [${chunkSize}] > [${maxMessageSize}]. ` +
+                        `Test name [${testResult.name}]`);
+                }
+
+                core.info(`Sending test results to webhook endpoint - part [${part}].`);
+                await axios.post(url, {
+                    ...base,
+                    part,
+                    testResults: testResultsChunk
+                });
+
+                testResultsChunk = [];
+                chunkSize = baseSize;
+                part += 1;
+            }
+
+            testResultsChunk.push(testResult);
+            chunkSize += size;
+        }
+
+        if (testResultsChunk.length > 0) {
+            core.info('Sending test results to webhook endpoint.');
+            await axios.post(url, {
+                ...base,
+                part,
+                last: true,
+                testResults: testResultsChunk
+            });
+        }
     } else {
         core.info('Skipping sending test results to webhook endpoint.');
     }

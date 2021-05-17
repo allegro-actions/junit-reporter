@@ -289,8 +289,9 @@ const core = __importStar(__nccwpck_require__(2186));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 function send(report, checkRun) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = core.getInput('webhook-url');
-        if (url) {
+        const url = core.getInput('webhook-url') || process.env.JUNIT_REPORTER_TEST_RESULTS_URL;
+        const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
+        if (url && maxMessageSize) {
             const testResults = [];
             for (const testSuite of report.getTestSuites()) {
                 if (!Array.isArray(testSuite.testcase)) {
@@ -308,8 +309,32 @@ function send(report, checkRun) {
                     });
                 }
             }
-            core.info(`Sending test results [${testResults.length}] to webhook endpoint.`);
-            yield axios_1.default.post(url, Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, checkRun: checkRun, ref: github.context.ref, action: github.context.action, runNumber: github.context.runNumber, runId: github.context.runId, testResults: testResults }));
+            const base = Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, checkRun: checkRun, ref: github.context.ref, action: github.context.action, runNumber: github.context.runNumber, runId: github.context.runId, part: 0, last: false, testResults: [] });
+            const baseSize = Buffer.byteLength(JSON.stringify(base));
+            let testResultsChunk = [];
+            let chunkSize = baseSize;
+            let part = 0;
+            for (const testResult of testResults) {
+                const size = Buffer.byteLength(JSON.stringify(testResult)) + 1;
+                if (chunkSize + size > maxMessageSize) {
+                    if (testResultsChunk.length == 0) {
+                        throw new Error('Test result size is exceeding webhook-message-size param. ' +
+                            `Test result size [${size}] + meta data [${chunkSize}] > [${maxMessageSize}]. ` +
+                            `Test name [${testResult.name}]`);
+                    }
+                    core.info(`Sending test results to webhook endpoint - part [${part}].`);
+                    yield axios_1.default.post(url, Object.assign(Object.assign({}, base), { part, testResults: testResultsChunk }));
+                    testResultsChunk = [];
+                    chunkSize = baseSize;
+                    part += 1;
+                }
+                testResultsChunk.push(testResult);
+                chunkSize += size;
+            }
+            if (testResultsChunk.length > 0) {
+                core.info('Sending test results to webhook endpoint.');
+                yield axios_1.default.post(url, Object.assign(Object.assign({}, base), { part, last: true, testResults: testResultsChunk }));
+            }
         }
         else {
             core.info('Skipping sending test results to webhook endpoint.');

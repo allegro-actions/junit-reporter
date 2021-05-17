@@ -17,9 +17,12 @@ inputs:
     required: false
     default: ${{ toJson(matrix) }}
   webhook-url:
-    description: 'Specifies the endpoint URL where the JUnit test results will be send'
+    description: 'Specifies the endpoint URL where the JUnit test results will be sent'
     required: false
-    default: ${{ secrets.TEST_RESULTS_URL }}
+  webhook-message-size:
+    description: 'Specifies the maximum size in bytes of the message sent to the webhook'
+    required: false
+    default: '917504'
 runs:
   using: 'node12'
   main: 'dist/index.js'
