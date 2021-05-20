@@ -5,7 +5,7 @@ branding:
   color: 'green'
 inputs:
   token:
-    description: 'Used to add check informations'
+    description: 'Used to add check information'
     required: false
     default: ${{ github.token }}
   path:
