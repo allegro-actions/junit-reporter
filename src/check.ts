@@ -35,12 +35,14 @@ export async function create(token: string, report: Report): Promise<CheckRun> {
   return {
     id: response.data.id,
     nodeId: response.data.node_id,
-    checkSuiteId: response.data.check_suite?.id
+    checkSuiteId: response.data.check_suite?.id,
+    conclusion
   };
 }
 
 export interface CheckRun {
   id: number,
   nodeId: string,
-  checkSuiteId: number | undefined
+  checkSuiteId: number | undefined,
+  conclusion: string
 }

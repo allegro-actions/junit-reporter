@@ -4,9 +4,10 @@ import * as core from '@actions/core';
 import axios from 'axios';
 import {TestCase} from 'junit2json';
 import {CheckRun} from './check';
+import Config from './configuration';
 
 export async function send(report: Report, checkRun: CheckRun): Promise<void> {
-    const url = core.getInput('webhook-url') || process.env.JUNIT_REPORTER_TEST_RESULTS_URL;
+    const url = core.getInput('webhook-url') || (await Config.get())?.webhookUrl;
     const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
 
     if (url && maxMessageSize) {
@@ -38,6 +39,7 @@ export async function send(report: Report, checkRun: CheckRun): Promise<void> {
             action: github.context.action,
             runNumber: github.context.runNumber,
             runId: github.context.runId,
+            created: Date.now(),
             part: 0,
             last: false,
             testResults: [],

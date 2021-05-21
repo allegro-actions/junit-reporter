@@ -237,11 +237,79 @@ function create(token, report) {
         return {
             id: response.data.id,
             nodeId: response.data.node_id,
-            checkSuiteId: (_a = response.data.check_suite) === null || _a === void 0 ? void 0 : _a.id
+            checkSuiteId: (_a = response.data.check_suite) === null || _a === void 0 ? void 0 : _a.id,
+            conclusion
         };
     });
 }
 exports.create = create;
+
+
+/***/ }),
+
+/***/ 5527:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const axios_1 = __importDefault(__nccwpck_require__(6545));
+const core = __importStar(__nccwpck_require__(2186));
+class Config {
+    get() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = core.getInput('configuration-url');
+            if (url) {
+                if (!Config.initialized) {
+                    Config.initialized = true;
+                    try {
+                        const response = yield axios_1.default.get(url);
+                        Config.cached = response.data;
+                        core.info('Successfully fetched configuration');
+                    }
+                    catch (e) {
+                        core.warning('Unable to fetch configuration from URL in configuration-url param. ' + (e instanceof Error ? e.toString() : ''));
+                    }
+                }
+            }
+            return Config.cached;
+        });
+    }
+}
+Config.cached = null;
+Config.initialized = false;
+exports.default = new Config();
 
 
 /***/ }),
@@ -287,9 +355,11 @@ exports.send = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
+const configuration_1 = __importDefault(__nccwpck_require__(5527));
 function send(report, checkRun) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const url = core.getInput('webhook-url') || process.env.JUNIT_REPORTER_TEST_RESULTS_URL;
+        const url = core.getInput('webhook-url') || ((_a = (yield configuration_1.default.get())) === null || _a === void 0 ? void 0 : _a.webhookUrl);
         const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
         if (url && maxMessageSize) {
             const testResults = [];
@@ -309,7 +379,7 @@ function send(report, checkRun) {
                     });
                 }
             }
-            const base = Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, checkRun: checkRun, ref: github.context.ref, action: github.context.action, runNumber: github.context.runNumber, runId: github.context.runId, part: 0, last: false, testResults: [] });
+            const base = Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, checkRun: checkRun, ref: github.context.ref, action: github.context.action, runNumber: github.context.runNumber, runId: github.context.runId, created: Date.now(), part: 0, last: false, testResults: [] });
             const baseSize = Buffer.byteLength(JSON.stringify(base));
             let testResultsChunk = [];
             let chunkSize = baseSize;

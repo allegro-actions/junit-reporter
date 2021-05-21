@@ -26,7 +26,8 @@ describe('event', () => {
         const checkRun = {
             id: 10,
             nodeId: 'checkRunNodeId',
-            checkSuiteId: 12
+            checkSuiteId: 12,
+            conclusion: 'success'
         };
 
         const scope = nock(host)
@@ -72,7 +73,8 @@ describe('event', () => {
         const checkRun = {
             id: 10,
             nodeId: 'checkRunNodeId',
-            checkSuiteId: 12
+            checkSuiteId: 12,
+            conclusion: 'success'
         };
 
         const first = nock(host)
@@ -105,7 +107,8 @@ describe('event', () => {
         const checkRun = {
             id: 10,
             nodeId: 'checkRunNodeId',
-            checkSuiteId: 12
+            checkSuiteId: 12,
+            conclusion: 'success'
         };
 
         await event.send(report, checkRun);

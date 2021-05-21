@@ -23,6 +23,10 @@ inputs:
     description: 'Specifies the maximum size in bytes of the message sent to the webhook'
     required: false
     default: '917504'
+  configuration-url:
+    description: 'Used to fetch external configuration. Put empty string to disable.'
+    required: false
+    default: 'https://c.allegrogroup.com/qyn1owR'
 runs:
   using: 'node12'
   main: 'dist/index.js'
