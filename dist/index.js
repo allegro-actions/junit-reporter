@@ -357,7 +357,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 const configuration_1 = __importDefault(__nccwpck_require__(5527));
 function send(report, checkRun) {
-    var _a;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         const url = core.getInput('webhook-url') || ((_a = (yield configuration_1.default.get())) === null || _a === void 0 ? void 0 : _a.webhookUrl);
         const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
@@ -369,14 +369,16 @@ function send(report, checkRun) {
                     continue;
                 }
                 for (const testCase of testSuite.testcase) {
-                    const name = testCase.name.trim();
-                    const classname = testCase.classname.trim();
-                    const result = getResult(testCase);
-                    testResults.push({
-                        name,
-                        classname,
-                        result
-                    });
+                    const name = (_b = testCase.name) === null || _b === void 0 ? void 0 : _b.trim();
+                    const classname = (_c = testCase.classname) === null || _c === void 0 ? void 0 : _c.trim();
+                    if (name || classname) {
+                        const result = getResult(testCase);
+                        testResults.push({
+                            name,
+                            classname,
+                            result
+                        });
+                    }
                 }
             }
             const base = Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, checkRun: checkRun, ref: github.context.ref, action: github.context.action, runNumber: github.context.runNumber, runId: github.context.runId, created: Date.now(), part: 0, last: false, testResults: [] });

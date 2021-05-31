@@ -19,15 +19,17 @@ export async function send(report: Report, checkRun: CheckRun): Promise<void> {
             }
 
             for (const testCase of testSuite.testcase) {
-                const name = testCase.name.trim();
-                const classname = testCase.classname.trim();
-                const result = getResult(testCase);
+                const name = testCase.name?.trim();
+                const classname = testCase.classname?.trim();
+                if (name || classname) {
+                    const result = getResult(testCase);
 
-                testResults.push({
-                    name,
-                    classname,
-                    result
-                });
+                    testResults.push({
+                        name,
+                        classname,
+                        result
+                    });
+                }
             }
         }
 
