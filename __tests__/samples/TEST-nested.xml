@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Qeppo Test Suite" tests="9" assertions="24" failures="0" errors="0" time="0.007299">
+    <testsuite name="Allegro\AccessPoints\Tests\AccessPointsIdMappingsTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/AccessPoints/Tests/AccessPointsIdMappingsTest.php" namespace="Allegro\AccessPoints\Tests" fullPackage="Allegro" package="Allegro" tests="2" assertions="6" failures="0" errors="0" time="0.003644">
+      <testcase name="serviceThrowExceptionTries3TimesAndFinallyReturnEmptyMappings" class="Allegro\AccessPoints\Tests\AccessPointsIdMappingsTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/AccessPoints/Tests/AccessPointsIdMappingsTest.php" line="23" assertions="2" time="0.002886"/>
+      <testcase name="fetchGdPointIdToPartnerIdMappings" class="Allegro\AccessPoints\Tests\AccessPointsIdMappingsTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/AccessPoints/Tests/AccessPointsIdMappingsTest.php" line="39" assertions="4" time="0.000758"/>
+    </testsuite>
+    <testsuite name="Allegro\Finance\Tests\FraudDataValidatorTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/Finance/Tests/FraudDataValidatorTest.php" namespace="Allegro\Finance\Tests" fullPackage="Allegro.Finance.Tests" tests="7" assertions="18" failures="0" errors="0" time="0.003655">
+      <testcase name="shouldValidate" class="Allegro\Finance\Tests\FraudDataValidatorTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/Finance/Tests/FraudDataValidatorTest.php" line="64" assertions="2" time="0.001862"/>
+      <testcase name="shouldReturnTrueIfOnlyDateIsProvided" class="Allegro\Finance\Tests\FraudDataValidatorTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/Finance/Tests/FraudDataValidatorTest.php" line="75" assertions="2" time="0.000224"/>
+      <testcase name="shouldAllowForEmptyDate" class="Allegro\Finance\Tests\FraudDataValidatorTest" file="/__w/qeppo/qeppo/qeppo/src/Allegro/Finance/Tests/FraudDataValidatorTest.php" line="86" assertions="2" time="0.000158"/>
+      <testsuite name="Allegro\Finance\Tests\FraudDataValidatorTest::shouldThrowExceptionOnInvalidDate" tests="4" assertions="12" failures="0" errors="0" time="0.001411">
+        <testcase name="shouldThrowExceptionOnInvalidDate with data set #0" assertions="3" time="0.000577"/>
+        <testcase name="shouldThrowExceptionOnInvalidDate with data set #1" assertions="3" time="0.000275"/>
+        <testcase name="shouldThrowExceptionOnInvalidDate with data set #2" assertions="3" time="0.000294"/>
+        <testcase name="shouldThrowExceptionOnInvalidDate with data set #3" assertions="3" time="0.000265"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

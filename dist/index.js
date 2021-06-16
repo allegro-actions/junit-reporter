@@ -356,31 +356,27 @@ const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 const configuration_1 = __importDefault(__nccwpck_require__(5527));
+const suites_1 = __nccwpck_require__(5597);
 function send(report, checkRun) {
-    var _a, _b, _c;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const url = core.getInput('webhook-url') || ((_a = (yield configuration_1.default.get())) === null || _a === void 0 ? void 0 : _a.webhookUrl);
         const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
         if (url && maxMessageSize) {
             const testResults = [];
-            for (const testSuite of report.getTestSuites()) {
-                if (!Array.isArray(testSuite.testcase)) {
-                    core.warning(`Found empty testcase: ${JSON.stringify(testSuite)}`);
-                    continue;
+            suites_1.forEachTestCase(report.getTestSuites(), (testCase => {
+                var _a, _b;
+                const name = (_a = testCase.name) === null || _a === void 0 ? void 0 : _a.trim();
+                const classname = (_b = testCase.classname) === null || _b === void 0 ? void 0 : _b.trim();
+                if (name || classname) {
+                    const result = getResult(testCase);
+                    testResults.push({
+                        name,
+                        classname,
+                        result
+                    });
                 }
-                for (const testCase of testSuite.testcase) {
-                    const name = (_b = testCase.name) === null || _b === void 0 ? void 0 : _b.trim();
-                    const classname = (_c = testCase.classname) === null || _c === void 0 ? void 0 : _c.trim();
-                    if (name || classname) {
-                        const result = getResult(testCase);
-                        testResults.push({
-                            name,
-                            classname,
-                            result
-                        });
-                    }
-                }
-            }
+            }));
             const base = Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, checkRun: checkRun, ref: github.context.ref, action: github.context.action, runNumber: github.context.runNumber, runId: github.context.runId, created: Date.now(), part: 0, last: false, testResults: [] });
             const baseSize = Buffer.byteLength(JSON.stringify(base));
             let testResultsChunk = [];
@@ -432,32 +428,13 @@ function getResult(testCase) {
 /***/ }),
 
 /***/ 7556:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.toMarkdown = void 0;
-const core = __importStar(__nccwpck_require__(2186));
+const suites_1 = __nccwpck_require__(5597);
 function getMessage(testCase) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     return (_k = (((_c = (_b = (_a = testCase.skipped) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message) === null || _c === void 0 ? void 0 : _c.trim()) ||
@@ -534,26 +511,21 @@ function getMessageAboutLimit(results, count) {
         : '';
 }
 function toMarkdown(report) {
-    var _a, _b, _c;
+    var _a, _b;
     if (!report.hasTests()) {
         return '### Test results not found\n';
     }
     const results = new Map();
-    for (const testSuite of report.getTestSuites()) {
-        if (!Array.isArray(testSuite.testcase)) {
-            core.warning(`Found empty testcase: ${JSON.stringify(testSuite)}`);
-            continue;
-        }
-        for (const testCase of testSuite.testcase) {
-            const type = getType(testCase);
-            if (type === undefined || (((_a = results.get(type)) === null || _a === void 0 ? void 0 : _a.length) || 0) >= 10)
-                continue;
-            const name = getName(testCase);
-            const message = getMessage(testCase);
-            const details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
-            results.set(type, (results.get(type) || []).concat(details));
-        }
-    }
+    suites_1.forEachTestCase(report.getTestSuites(), (testCase) => {
+        var _a;
+        const type = getType(testCase);
+        if (type === undefined || (((_a = results.get(type)) === null || _a === void 0 ? void 0 : _a.length) || 0) >= 10)
+            return;
+        const name = getName(testCase);
+        const message = getMessage(testCase);
+        const details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
+        results.set(type, (results.get(type) || []).concat(details));
+    });
     const tests = report.counter.tests, successful = report.counter.succesfull;
     let result = `### Found ${tests} ${getPlural('tests', tests)}\n`;
     if (successful === tests) {
@@ -579,12 +551,12 @@ function toMarkdown(report) {
     }
     const keys = [...results.keys()].sort((a, b) => a.localeCompare(b));
     for (const key of keys) {
-        if ((((_b = results.get(key)) === null || _b === void 0 ? void 0 : _b.length) || 0) <= 0)
+        if ((((_a = results.get(key)) === null || _a === void 0 ? void 0 : _a.length) || 0) <= 0)
             continue;
         result += `\n### ${getTitle(key)}\n`;
         result += getMessageAboutLimit(results.get(key), report.counter.get(key));
         result += '\n';
-        result += ((_c = results.get(key)) === null || _c === void 0 ? void 0 : _c.join('\n')) || '';
+        result += ((_b = results.get(key)) === null || _b === void 0 ? void 0 : _b.join('\n')) || '';
         result += '\n';
     }
     return result;
@@ -731,6 +703,53 @@ exports.getName = getName;
 
 /***/ }),
 
+/***/ 5597:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.forEachTestCase = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+function forEachTestCase(suites, func) {
+    for (const suite of (suites || [])) {
+        forEachTestCaseInSuite(suite, func);
+    }
+}
+exports.forEachTestCase = forEachTestCase;
+function forEachTestCaseInSuite(suite, func) {
+    if (!Array.isArray(suite.testcase) && !Array.isArray(suite.testsuite)) {
+        core.warning(`Found empty testcase: ${JSON.stringify(suite)}`);
+        return;
+    }
+    for (const testCase of (suite.testcase || [])) {
+        func(testCase);
+    }
+    forEachTestCase((suite.testsuite || []), func);
+}
+
+
+/***/ }),
+
 /***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -864,7 +883,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(5278);
@@ -950,6 +969,21 @@ function getInput(name, options) {
     return val.trim();
 }
 exports.getInput = getInput;
+/**
+ * Gets the values of an multiline input.  Each value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string[]
+ *
+ */
+function getMultilineInput(name, options) {
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter(x => x !== '');
+    return inputs;
+}
+exports.getMultilineInput = getMultilineInput;
 /**
  * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
  * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
@@ -3183,8 +3217,9 @@ function _objectWithoutProperties(source, excluded) {
   return target;
 }
 
-const VERSION = "3.4.0";
+const VERSION = "3.5.1";
 
+const _excluded = ["authStrategy"];
 class Octokit {
   constructor(options = {}) {
     const hook = new beforeAfterHook.Collection();
@@ -3246,7 +3281,7 @@ class Octokit {
       const {
         authStrategy
       } = options,
-            otherOptions = _objectWithoutProperties(options, ["authStrategy"]);
+            otherOptions = _objectWithoutProperties(options, _excluded);
 
       const auth = authStrategy(Object.assign({
         request: this.request,
@@ -3688,7 +3723,7 @@ function withDefaults(oldDefaults, newDefaults) {
   });
 }
 
-const VERSION = "6.0.11";
+const VERSION = "6.0.12";
 
 const userAgent = `octokit-endpoint.js/${VERSION} ${universalUserAgent.getUserAgent()}`; // DEFAULTS has all properties set that EndpointOptions has, except url.
 // So we use RequestParameters and add method as additional required property.
@@ -3725,7 +3760,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var request = __nccwpck_require__(6234);
 var universalUserAgent = __nccwpck_require__(5030);
 
-const VERSION = "4.6.2";
+const VERSION = "4.6.4";
 
 class GraphqlError extends Error {
   constructor(request, response) {
@@ -3846,7 +3881,60 @@ exports.withCustomRequest = withCustomRequest;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-const VERSION = "2.13.3";
+const VERSION = "2.13.5";
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+
+    if (enumerableOnly) {
+      symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+    }
+
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
 
 /**
  * Some “list” response that can be paginated have a different response structure
@@ -3865,6 +3953,13 @@ const VERSION = "2.13.3";
  * otherwise match: https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
  */
 function normalizePaginatedListResponse(response) {
+  // endpoints can respond with 204 if repository is empty
+  if (!response.data) {
+    return _objectSpread2(_objectSpread2({}, response), {}, {
+      data: []
+    });
+  }
+
   const responseNeedsNormalization = "total_count" in response.data && !("url" in response.data);
   if (!responseNeedsNormalization) return response; // keep the additional properties intact as there is currently no other way
   // to retrieve the same information.
@@ -3903,19 +3998,32 @@ function iterator(octokit, route, parameters) {
         if (!url) return {
           done: true
         };
-        const response = await requestMethod({
-          method,
-          url,
-          headers
-        });
-        const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
-        // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
-        // sets `url` to undefined if "next" URL is not present or `link` header is not set
 
-        url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
-        return {
-          value: normalizedResponse
-        };
+        try {
+          const response = await requestMethod({
+            method,
+            url,
+            headers
+          });
+          const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
+          // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
+          // sets `url` to undefined if "next" URL is not present or `link` header is not set
+
+          url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
+          return {
+            value: normalizedResponse
+          };
+        } catch (error) {
+          if (error.status !== 409) throw error;
+          url = "";
+          return {
+            value: {
+              status: 200,
+              headers: {},
+              data: []
+            }
+          };
+        }
       }
 
     })
@@ -5240,7 +5348,8 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var deprecation = __nccwpck_require__(8932);
 var once = _interopDefault(__nccwpck_require__(1223));
 
-const logOnce = once(deprecation => console.warn(deprecation));
+const logOnceCode = once(deprecation => console.warn(deprecation));
+const logOnceHeaders = once(deprecation => console.warn(deprecation));
 /**
  * Error with extra properties to help with debugging
  */
@@ -5257,14 +5366,17 @@ class RequestError extends Error {
 
     this.name = "HttpError";
     this.status = statusCode;
-    Object.defineProperty(this, "code", {
-      get() {
-        logOnce(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
-        return statusCode;
-      }
+    let headers;
 
-    });
-    this.headers = options.headers || {}; // redact request credentials without mutating original request options
+    if ("headers" in options && typeof options.headers !== "undefined") {
+      headers = options.headers;
+    }
+
+    if ("response" in options) {
+      this.response = options.response;
+      headers = options.response.headers;
+    } // redact request credentials without mutating original request options
+
 
     const requestCopy = Object.assign({}, options.request);
 
@@ -5279,7 +5391,22 @@ class RequestError extends Error {
     .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
     // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
     .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
-    this.request = requestCopy;
+    this.request = requestCopy; // deprecations
+
+    Object.defineProperty(this, "code", {
+      get() {
+        logOnceCode(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
+        return statusCode;
+      }
+
+    });
+    Object.defineProperty(this, "headers", {
+      get() {
+        logOnceHeaders(new deprecation.Deprecation("[@octokit/request-error] `error.headers` is deprecated, use `error.response.headers`."));
+        return headers || {};
+      }
+
+    });
   }
 
 }
@@ -5306,13 +5433,15 @@ var isPlainObject = __nccwpck_require__(3287);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
 
-const VERSION = "5.4.15";
+const VERSION = "5.6.0";
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
 }
 
 function fetchWrapper(requestOptions) {
+  const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
+
   if (isPlainObject.isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
     requestOptions.body = JSON.stringify(requestOptions.body);
   }
@@ -5328,12 +5457,18 @@ function fetchWrapper(requestOptions) {
     redirect: requestOptions.redirect
   }, // `requestOptions.request.agent` type is incompatible
   // see https://github.com/octokit/types.ts/pull/264
-  requestOptions.request)).then(response => {
+  requestOptions.request)).then(async response => {
     url = response.url;
     status = response.status;
 
     for (const keyAndValue of response.headers) {
       headers[keyAndValue[0]] = keyAndValue[1];
+    }
+
+    if ("deprecation" in headers) {
+      const matches = headers.link && headers.link.match(/<([^>]+)>; rel="deprecation"/);
+      const deprecationLink = matches && matches.pop();
+      log.warn(`[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${headers.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`);
     }
 
     if (status === 204 || status === 205) {
@@ -5347,49 +5482,43 @@ function fetchWrapper(requestOptions) {
       }
 
       throw new requestError.RequestError(response.statusText, status, {
-        headers,
+        response: {
+          url,
+          status,
+          headers,
+          data: undefined
+        },
         request: requestOptions
       });
     }
 
     if (status === 304) {
       throw new requestError.RequestError("Not modified", status, {
-        headers,
+        response: {
+          url,
+          status,
+          headers,
+          data: await getResponseData(response)
+        },
         request: requestOptions
       });
     }
 
     if (status >= 400) {
-      return response.text().then(message => {
-        const error = new requestError.RequestError(message, status, {
+      const data = await getResponseData(response);
+      const error = new requestError.RequestError(toErrorMessage(data), status, {
+        response: {
+          url,
+          status,
           headers,
-          request: requestOptions
-        });
-
-        try {
-          let responseBody = JSON.parse(error.message);
-          Object.assign(error, responseBody);
-          let errors = responseBody.errors; // Assumption `errors` would always be in Array format
-
-          error.message = error.message + ": " + errors.map(JSON.stringify).join(", ");
-        } catch (e) {// ignore, see octokit/rest.js#684
-        }
-
-        throw error;
+          data
+        },
+        request: requestOptions
       });
+      throw error;
     }
 
-    const contentType = response.headers.get("content-type");
-
-    if (/application\/json/.test(contentType)) {
-      return response.json();
-    }
-
-    if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
-      return response.text();
-    }
-
-    return getBufferResponse(response);
+    return getResponseData(response);
   }).then(data => {
     return {
       status,
@@ -5398,15 +5527,40 @@ function fetchWrapper(requestOptions) {
       data
     };
   }).catch(error => {
-    if (error instanceof requestError.RequestError) {
-      throw error;
-    }
-
+    if (error instanceof requestError.RequestError) throw error;
     throw new requestError.RequestError(error.message, 500, {
-      headers,
       request: requestOptions
     });
   });
+}
+
+async function getResponseData(response) {
+  const contentType = response.headers.get("content-type");
+
+  if (/application\/json/.test(contentType)) {
+    return response.json();
+  }
+
+  if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
+    return response.text();
+  }
+
+  return getBufferResponse(response);
+}
+
+function toErrorMessage(data) {
+  if (typeof data === "string") return data; // istanbul ignore else - just in case
+
+  if ("message" in data) {
+    if (Array.isArray(data.errors)) {
+      return `${data.message}: ${data.errors.map(JSON.stringify).join(", ")}`;
+    }
+
+    return data.message;
+  } // istanbul ignore next - just in case
+
+
+  return `Unknown error: ${JSON.stringify(data)}`;
 }
 
 function withDefaults(oldEndpoint, newDefaults) {

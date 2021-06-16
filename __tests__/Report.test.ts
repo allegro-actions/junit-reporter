@@ -7,10 +7,11 @@ describe('reports', () => {
 
     const names = report.getTestSuites().map((it) => it.name);
 
-    expect(names.length).toEqual(4);
+    expect(names.length).toEqual(5);
     expect(names).toContain('pl.failure.github.GitHubSpec');
     expect(names).toContain('pl.success.github.GitHubSpec');
     expect(names).toContain('jest tests');
+
 
     expect(report.hasTests()).toBeTruthy();
     expect(report.isSuccesfull()).toBeFalsy();
@@ -18,8 +19,8 @@ describe('reports', () => {
     expect(report.hasErrors()).toBeFalsy();
     expect(report.hasSkipped()).toBeFalsy();
 
-    expect(report.counter.tests).toEqual(9);
-    expect(report.counter.succesfull).toEqual(8);
+    expect(report.counter.tests).toEqual(18);
+    expect(report.counter.succesfull).toEqual(17);
     expect(report.counter.failures).toEqual(1);
     expect(report.counter.errors).toEqual(0);
     expect(report.counter.skipped).toEqual(0);
