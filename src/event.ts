@@ -5,33 +5,27 @@ import axios from 'axios';
 import {TestCase} from 'junit2json';
 import {CheckRun} from './check';
 import Config from './configuration';
+import {forEachTestCase} from './suites';
 
 export async function send(report: Report, checkRun: CheckRun): Promise<void> {
     const url = core.getInput('webhook-url') || (await Config.get())?.webhookUrl;
     const maxMessageSize = parseInt(core.getInput('webhook-message-size'));
 
     if (url && maxMessageSize) {
-        const testResults = [];
-        for (const testSuite of report.getTestSuites()) {
-            if (!Array.isArray(testSuite.testcase)) {
-                core.warning(`Found empty testcase: ${JSON.stringify(testSuite)}`);
-                continue;
-            }
+        const testResults: {name?: string, classname?: string, result: string}[] = [];
+        forEachTestCase(report.getTestSuites(), (testCase => {
+            const name = testCase.name?.trim();
+            const classname = testCase.classname?.trim();
+            if (name || classname) {
+                const result = getResult(testCase);
 
-            for (const testCase of testSuite.testcase) {
-                const name = testCase.name?.trim();
-                const classname = testCase.classname?.trim();
-                if (name || classname) {
-                    const result = getResult(testCase);
-
-                    testResults.push({
-                        name,
-                        classname,
-                        result
-                    });
-                }
+                testResults.push({
+                    name,
+                    classname,
+                    result
+                });
             }
-        }
+        }));
 
         const base = {
             ...github.context.repo,

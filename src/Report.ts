@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as glob from '@actions/glob';
 import { parse, TestSuite, TestSuites } from 'junit2json';
 import Counter from './Counter';
+import {NestableTestSuite} from './suites';
 
 export const { readFile } = fs.promises;
 
@@ -10,7 +11,7 @@ export default class Report {
   readonly counter: Counter = new Counter();
 
   private readonly path: string;
-  private testSuites: TestSuite[] = [];
+  private testSuites: NestableTestSuite[] = [];
 
   constructor(path: string) {
     this.path = path;
@@ -31,17 +32,17 @@ export default class Report {
           if (testsuite.name === 'undefined')
             testsuite.name = result.name || testsuite.name;
 
-          this.testSuites.push(testsuite);
+          this.testSuites.push(testsuite as NestableTestSuite);
         }
       } else {
-        this.testSuites.push(result);
+        this.testSuites.push(result as NestableTestSuite);
       }
     }
 
     this.counter.setup(this.testSuites);
   }
 
-  getTestSuites(): TestSuite[] {
+  getTestSuites(): NestableTestSuite[] {
     return this.testSuites;
   }
 

@@ -1,6 +1,6 @@
-import * as core from '@actions/core';
 import { TestCase } from 'junit2json';
 import Report from './Report';
+import {forEachTestCase} from './suites';
 
 function getMessage(testCase: TestCase): string | undefined {
   return (
@@ -93,25 +93,18 @@ export function toMarkdown(report: Report): string {
 
   const results: Map<string, string[]> = new Map();
 
-  for (const testSuite of report.getTestSuites()) {
-    if (!Array.isArray(testSuite.testcase)) {
-      core.warning(`Found empty testcase: ${JSON.stringify(testSuite)}`);
-      continue;
-    }
+  forEachTestCase(report.getTestSuites(), (testCase) => {
+    const type = getType(testCase);
+    if (type === undefined || (results.get(type)?.length || 0) >= 10)
+      return;
 
-    for (const testCase of testSuite.testcase) {
-      const type = getType(testCase);
-      if (type === undefined || (results.get(type)?.length || 0) >= 10)
-        continue;
+    const name = getName(testCase);
+    const message = getMessage(testCase);
 
-      const name = getName(testCase);
-      const message = getMessage(testCase);
+    const details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
 
-      const details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
-
-      results.set(type, (results.get(type) || []).concat(details));
-    }
-  }
+    results.set(type, (results.get(type) || []).concat(details));
+  });
 
   const tests = report.counter.tests,
     successful = report.counter.succesfull;

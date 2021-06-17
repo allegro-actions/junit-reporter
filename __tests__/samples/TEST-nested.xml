@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Root Test Suite" tests="9" assertions="24" failures="0" errors="0" time="0.007299">
+    <testsuite name="suite1" file="/suite1.php" namespace="Tests" fullPackage="Dummy" package="Dummy" tests="2" assertions="6" failures="0" errors="0" time="0.003644">
+      <testcase name="case1" class="Case1" file="/case1.php" line="23" assertions="2" time="0.002886"/>
+      <testcase name="case2" class="Case2" file="/case2.php" line="39" assertions="4" time="0.000758"/>
+    </testsuite>
+    <testsuite name="suite2" file="/suite2.php" namespace="Tests" fullPackage="Tests" tests="7" assertions="18" failures="0" errors="0" time="0.003655">
+      <testcase name="case3" class="Case3" file="/case3.php" line="64" assertions="2" time="0.001862"/>
+      <testcase name="case4" class="Case4" file="/case4.php" line="75" assertions="2" time="0.000224"/>
+      <testcase name="case5" class="Case5" file="/case5.php" line="86" assertions="2" time="0.000158"/>
+      <testsuite name="suite3" tests="4" assertions="12" failures="0" errors="0" time="0.001411">
+        <testcase name="case6" assertions="3" time="0.000577"/>
+        <testcase name="case7" assertions="3" time="0.000275"/>
+        <testcase name="case8" assertions="3" time="0.000294"/>
+        <testcase name="case9" assertions="3" time="0.000265"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
