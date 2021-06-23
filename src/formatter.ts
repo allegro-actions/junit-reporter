@@ -1,6 +1,7 @@
 import { TestCase } from 'junit2json';
 import Report from './Report';
-import {forEachTestCase} from './suites';
+import { forEachTestCase } from './suites';
+import { markdownTable } from './markdown-table';
 
 function getMessage(testCase: TestCase): string | undefined {
   return (
@@ -88,7 +89,7 @@ function getMessageAboutLimit(
 
 export function toMarkdown(report: Report): string {
   if (!report.hasTests()) {
-    return '### Test results not found\n';
+    return '# Test results not found\n';
   }
 
   const results: Map<string, string[]> = new Map();
@@ -101,7 +102,7 @@ export function toMarkdown(report: Report): string {
     const name = getName(testCase);
     const message = getMessage(testCase);
 
-    const details = `<details>\n <summary>${name}</summary>\n\n${message}\n\n</details>`;
+    const details = `<details>\n<summary>${name}</summary>\n\n${message}\n\n</details>`;
 
     results.set(type, (results.get(type) || []).concat(details));
   });
@@ -109,7 +110,16 @@ export function toMarkdown(report: Report): string {
   const tests = report.counter.tests,
     successful = report.counter.succesfull;
 
-  let result = `### Found ${tests} ${getPlural('tests', tests)}\n`;
+  let result = `# Results (${tests} ${getPlural('tests', tests)}) ${successful === tests ? '✓' : '✗'}\n`;
+
+  report.getTestSuites().forEach((suite) => {
+    result += `\n## ${suite.name}\n\n`;
+    const testCases = suite.testcase || [];
+    const rows = testCases.map(it => [`${it.name}`, `${it.failure || it.error ? '×' : it.skipped ? '💔' : '✓'}`, `${(it.time || 0) * 1000} ms`]);
+    const tableHeader = ['Test case', 'Result', 'Duration'];
+    result += markdownTable([tableHeader].concat(rows), {align: ['l', 'c', 'c']});
+    result += '\n';
+  });
 
   if (successful === tests) {
     result += '\n- **All** tests were successful';
@@ -144,7 +154,7 @@ export function toMarkdown(report: Report): string {
   for (const key of keys) {
     if ((results.get(key)?.length || 0) <= 0) continue;
 
-    result += `\n### ${getTitle(key)}\n`;
+    result += `\n\n## ${getTitle(key)}\n`;
     result += getMessageAboutLimit(results.get(key), report.counter.get(key));
     result += '\n';
 
