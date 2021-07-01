@@ -15,7 +15,7 @@ describe('formatter', () => {
   test('should handle empty tests results', async () => {
     report.hasTests = jest.fn(() => false);
 
-    expect(toMarkdown(report)).toEqual('### Test results not found\n');
+    expect(toMarkdown(report)).toEqual('# Test results not found\n');
   });
 
   test('should handle successful test', async () => {
@@ -25,7 +25,7 @@ describe('formatter', () => {
         classname: 'TestSuiteClassName',
         tests: 1,
         testcase: [
-          { name: 'TestCase', classname: 'TestCaseClassName' } as TestCase,
+          { name: 'TestCase', classname: 'TestCaseClassName', time: 0.006 } as TestCase,
         ],
       } as TestSuite,
     ]);
@@ -40,9 +40,17 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 1 test\n\n- **All** tests were successful'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (1 test) ✓
+      
+      ## TestSuite
+      
+      | Test case | Result | Duration |
+      | :-------- | :----: | :------: |
+      | TestCase  |    ✓   |   6 ms   |
+      
+      - **All** tests were successful
+    `));
   });
 
   test('should handle empty testcase', async () => {
@@ -65,9 +73,16 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 1 test\n\n- **All** tests were successful'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (1 test) ✓
+      
+      ## TestSuite
+      
+      | Test case | Result | Duration |
+      | :-------- | :----: | :------: |
+      
+      - **All** tests were successful
+    `));
   });
 
   test('should handle failed test', async () => {
@@ -103,16 +118,29 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 2 tests\n\n' +
-        '- **1** test was successful\n' +
-        '- **1** test failed\n' +
-        '### Failed tests\n\n' +
-        '<details>\n ' +
-        '<summary><strong>TestCaseClassName</strong>: Failed TestCase</summary>\n\n' +
-        '> Failed message\n\n' +
-        '</details>\n'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (2 tests) ✗
+      
+      ## TestSuite
+      
+      | Test case           | Result | Duration |
+      | :------------------ | :----: | :------: |
+      | Successful TestCase |    ✓   |   0 ms   |
+      | Failed TestCase     |    ×   |   0 ms   |
+      
+      - **1** test was successful
+      - **1** test failed
+      
+      ## Failed tests
+      
+      <details>
+      <summary><strong>TestCaseClassName</strong>: Failed TestCase</summary>
+      
+      > Failed message
+      
+      </details>
+      
+    `));
   });
 
   test('should handle skipped test', async () => {
@@ -148,16 +176,29 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 2 tests\n\n' +
-        '- **1** test was successful\n' +
-        '- **1** test is skipped\n' +
-        '### Skipped tests\n\n' +
-        '<details>\n ' +
-        '<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>\n\n' +
-        '> Skipped\n\n' +
-        '</details>\n'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (2 tests) ✗
+  
+      ## TestSuite
+      
+      | Test case           | Result | Duration |
+      | :------------------ | :----: | :------: |
+      | Successful TestCase |    ✓   |   0 ms   |
+      | Skipped TestCase    |   💔   |   0 ms   |
+      
+      - **1** test was successful
+      - **1** test is skipped
+      
+      ## Skipped tests
+      
+      <details>
+      <summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>
+      
+      > Skipped
+      
+      </details>
+      
+    `));
   });
 
   test('should handle test without message', async () => {
@@ -189,16 +230,28 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 1 test\n\n' +
-        '- **None** test were successful\n' +
-        '- **1** test is skipped\n' +
-        '### Skipped tests\n\n' +
-        '<details>\n ' +
-        '<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>\n\n' +
-        '> No message provided\n\n' +
-        '</details>\n'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (1 test) ✗
+  
+      ## TestSuite
+      
+      | Test case        | Result | Duration |
+      | :--------------- | :----: | :------: |
+      | Skipped TestCase |   💔   |   0 ms   |
+      
+      - **None** test were successful
+      - **1** test is skipped
+      
+      ## Skipped tests
+      
+      <details>
+      <summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>
+      
+      > No message provided
+      
+      </details>
+
+    `));
   });
 
   test('should handle test with error', async () => {
@@ -234,16 +287,30 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 2 tests\n\n' +
-        '- **1** test was successful\n' +
-        '- **1** test ended with error\n' +
-        '### Errors\n\n' +
-        '<details>\n ' +
-        '<summary><strong>TestCaseClassName</strong>: TestCase with Error</summary>\n\n' +
-        '> Something\n> failed\n\n' +
-        '</details>\n'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (2 tests) ✗
+  
+      ## TestSuite
+      
+      | Test case           | Result | Duration |
+      | :------------------ | :----: | :------: |
+      | Successful TestCase |    ✓   |   0 ms   |
+      | TestCase with Error |    ×   |   0 ms   |
+      
+      - **1** test was successful
+      - **1** test ended with error
+      
+      ## Errors
+      
+      <details>
+      <summary><strong>TestCaseClassName</strong>: TestCase with Error</summary>
+      
+      > Something
+      > failed
+      
+      </details>
+
+    `));
   });
 
   test('should handle multiple results', async () => {
@@ -318,28 +385,70 @@ describe('formatter', () => {
 
     const result = toMarkdown(report);
 
-    expect(result).toEqual(
-      '### Found 5 tests\n\n' +
-        '- **2** tests were successful\n' +
-        '- **1** test failed\n' +
-        '- **1** test ended with error\n' +
-        '- **1** test is skipped\n' +
-        '### Errors\n\n' +
-        '<details>\n ' +
-        '<summary><strong>TestCaseClassName</strong>: TestCase with Error</summary>\n\n' +
-        '> Something\n> failed\n\n' +
-        '</details>\n\n' +
-        '### Failed tests\n\n' +
-        '<details>\n ' +
-        '<summary><strong>FailedCaseClassName</strong>: Failed TestCase</summary>\n\n' +
-        '> Failed\n\n' +
-        '</details>\n\n' +
-        '### Skipped tests\n\n' +
-        '<details>\n ' +
-        '<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>' +
-        '\n\n> Skipped\n\n' +
-        '</details>\n'
-    );
+    expect(result).toEqual(trimmed(`
+      # Results (5 tests) ✗
+  
+      ## First TestSuite
+      
+      | Test case           | Result | Duration |
+      | :------------------ | :----: | :------: |
+      | Successful TestCase |    ✓   |   0 ms   |
+      
+      ## SecondTestSuite
+      
+      | Test case           | Result | Duration |
+      | :------------------ | :----: | :------: |
+      | Successful TestCase |    ✓   |   0 ms   |
+      | Failed TestCase     |    ×   |   0 ms   |
+      
+      ## Third TestSuite
+      
+      | Test case        | Result | Duration |
+      | :--------------- | :----: | :------: |
+      | Skipped TestCase |   💔   |   0 ms   |
+      
+      ## SeparateTestSuite
+      
+      | Test case           | Result | Duration |
+      | :------------------ | :----: | :------: |
+      | TestCase with Error |    ×   |   0 ms   |
+      
+      - **2** tests were successful
+      - **1** test failed
+      - **1** test ended with error
+      - **1** test is skipped
+      
+      ## Errors
+      
+      <details>
+      <summary><strong>TestCaseClassName</strong>: TestCase with Error</summary>
+      
+      > Something
+      > failed
+      
+      </details>
+      
+      
+      ## Failed tests
+      
+      <details>
+      <summary><strong>FailedCaseClassName</strong>: Failed TestCase</summary>
+      
+      > Failed
+      
+      </details>
+      
+      
+      ## Skipped tests
+      
+      <details>
+      <summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>
+      
+      > Skipped
+      
+      </details>
+    
+    `));
   });
 
   test('should only display first 10 failed tests', async () => {
@@ -431,3 +540,10 @@ describe('formatter', () => {
     );
   });
 });
+
+function trimmed(input: string): string {
+  return input
+      .replace(/^([ \t\r])*/gm, '')
+      .replace(/^\n*/, '')
+      .replace(/\n$/, '');
+}
