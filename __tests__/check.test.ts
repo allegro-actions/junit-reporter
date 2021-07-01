@@ -59,7 +59,7 @@ describe('check', () => {
             'conclusion': 'success',
             'output': {
               'title': 'JUnit Report: build',
-              'summary': '### Found 2 tests\n\n- **1** test was successful\n- **1** test is skipped\n### Skipped tests\n\n<details>\n <summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>\n\n> Skipped\n\n</details>\n'
+              'summary': '# Results (2 tests) ✗\n\n## TestSuite\n\n| Test case           | Result | Duration |\n| :------------------ | :----: | :------: |\n| Successful TestCase |    ✓   |   0 ms   |\n| Skipped TestCase    |   💔   |   0 ms   |\n\n- **1** test was successful\n- **1** test is skipped\n\n## Skipped tests\n\n<details>\n<summary><strong>TestCaseClassName</strong>: Skipped TestCase</summary>\n\n> Skipped\n\n</details>\n'
             }
           }
         )
