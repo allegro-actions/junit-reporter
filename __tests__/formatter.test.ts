@@ -70,6 +70,29 @@ describe('formatter', () => {
     );
   });
 
+  test('should handle null values in data', async () => {
+    report.getTestSuites = jest.fn(() => [
+      {
+        tests: 1,
+        testcase: undefined as unknown,
+      } as TestSuite,
+    ]);
+
+    report.hasTests = jest.fn(() => true);
+    report.hasFailures = jest.fn(() => false);
+    report.hasErrors = jest.fn(() => false);
+    report.hasSkipped = jest.fn(() => false);
+
+    report.counter.tests = 1;
+    report.counter.succesfull = 1;
+
+    const result = toMarkdown(report);
+
+    expect(result).toEqual(
+        '### Found 1 test\n\n- **All** tests were successful'
+    );
+  });
+
   test('should handle failed test', async () => {
     report.getTestSuites = jest.fn(() => [
       {

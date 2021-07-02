@@ -8,8 +8,9 @@ export async function run(): Promise<void> {
     const token = core.getInput('token', { required: true });
     const reportsPath = core.getInput('path', { required: true });
     const matrix = core.getInput('matrix', { required: false });
-    core.debug(JSON.stringify(matrix, null, 2));
-
+    if (matrix != null) {
+      core.debug(JSON.stringify(matrix, null, 2));
+    }
     const report = new Report(reportsPath);
     await report.build();
 

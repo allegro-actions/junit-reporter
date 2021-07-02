@@ -15,8 +15,8 @@ function getMessage(testCase: TestCase): string | undefined {
 }
 
 function getName(testCase: TestCase): string {
-  const name = testCase.name.trim();
-  const classname = testCase.classname.trim();
+  const name = testCase.name?.trim();
+  const classname = testCase.classname?.trim();
 
   if (name.toLowerCase() === classname.toLowerCase()) {
     return `<strong>${name}</strong>`;
