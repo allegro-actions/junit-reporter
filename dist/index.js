@@ -446,7 +446,10 @@ function getName(testCase) {
     var _a, _b;
     const name = (_a = testCase.name) === null || _a === void 0 ? void 0 : _a.trim();
     const classname = (_b = testCase.classname) === null || _b === void 0 ? void 0 : _b.trim();
-    if (name.toLowerCase() === classname.toLowerCase()) {
+    if (name === undefined || classname === undefined) {
+        return '<strong>Default/Unknown test case:</strong>';
+    }
+    else if (name.toLowerCase() === classname.toLowerCase()) {
         return `<strong>${name}</strong>`;
     }
     else {

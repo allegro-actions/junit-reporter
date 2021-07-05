@@ -70,11 +70,18 @@ describe('formatter', () => {
     );
   });
 
-  test('should handle null values in data', async () => {
+  test('should handle undefined values in data', async () => {
     report.getTestSuites = jest.fn(() => [
       {
+        name: 'TestSuite',
+        classname: 'TestSuiteClassName',
         tests: 1,
-        testcase: undefined as unknown,
+        failures: 1,
+        testcase: [
+          { name: undefined as unknown,
+            classname: undefined as unknown,
+            failure: [{ message: 'Failed message' }] } as TestCase,
+        ],
       } as TestSuite,
     ]);
 
@@ -84,12 +91,20 @@ describe('formatter', () => {
     report.hasSkipped = jest.fn(() => false);
 
     report.counter.tests = 1;
-    report.counter.succesfull = 1;
+    report.counter.failures = 1;
+    report.counter.succesfull = 0;
+    report.counter.get = jest.fn(() => 1);
 
     const result = toMarkdown(report);
 
     expect(result).toEqual(
-        '### Found 1 test\n\n- **All** tests were successful'
+        '### Found 1 test\n\n' +
+        '- **None** test were successful\n' +
+        '### Failed tests\n\n' +
+        '<details>\n ' +
+        '<summary><strong>Default/Unknown test case:</strong></summary>\n\n' +
+        '> Failed message\n\n' +
+        '</details>\n'
     );
   });
 

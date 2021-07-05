@@ -18,7 +18,9 @@ function getName(testCase: TestCase): string {
   const name = testCase.name?.trim();
   const classname = testCase.classname?.trim();
 
-  if (name.toLowerCase() === classname.toLowerCase()) {
+  if (name === undefined || classname === undefined) {
+    return '<strong>Default/Unknown test case:</strong>';
+  } else if (name.toLowerCase() === classname.toLowerCase()) {
     return `<strong>${name}</strong>`;
   } else {
     return `<strong>${classname}</strong>: ${name}`;
