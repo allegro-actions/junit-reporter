@@ -26,7 +26,7 @@ inputs:
   configuration-url:
     description: 'Used to fetch external configuration. Put empty string to disable.'
     required: false
-    default: 'https://c.allegrogroup.com/qyn1owR'
+    default: 'https://c.allegrogroup.com/GVjMzEy'
 runs:
   using: 'node12'
   main: 'dist/index.js'
